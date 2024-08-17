@@ -1,0 +1,12 @@
+name: kbl_indi2
+title: kbl_indi2
+username: qd5uqi-0-0
+account: qd5uqi-0-0
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12469022
+bundleId: 8994445
+url: https://qd5uqi-0-0.shinyapps.io/kbl_indi2/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

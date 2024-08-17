@@ -25,3 +25,4 @@ players <- players %>%
 
 names(players)
 str(players)
+write.csv(players, 'main_data.csv')
