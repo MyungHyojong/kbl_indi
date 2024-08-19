@@ -21,9 +21,14 @@ players <- players %>%
     time_min = sapply(strsplit(as.character(MIN), ':'), `[`, 1)
   ) %>%
   mutate(across(c(6, 8, 10, 12, 14:15, 26:34), as.numeric)) %>% 
-  mutate(Date = as.Date(gsub(" \\(.*\\)", "", Date), format = "%Y.%m.%d"))
+  mutate(Date = as.Date(gsub(" \\(.*\\)", "", Date), format = "%Y.%m.%d")) %>%
+  mutate(foreign = ifelse(nchar(Name)<=3, 0, 1))
+
 
 names(players)
 str(players)
 write.csv(players, 'main_data_fixed.csv')
 
+players
+table(players$Team)
+players$Team <- 
