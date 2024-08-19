@@ -7,7 +7,7 @@ for(file in files[2:length(files)]){
   tmp_players <- read_csv(file, col_types = cols())
   players <- rbind(players, tmp_players)
 }
-
+names(players) <- gsub('%','percentage', names(players))
 players <- players %>%
   mutate(
     `2PTM` = sapply(strsplit(as.character(`2PT M/A`), '/'), `[`, 1),
@@ -25,5 +25,5 @@ players <- players %>%
 
 names(players)
 str(players)
-write.csv(players, 'main_data.csv')
+write.csv(players, 'main_data_fixed.csv')
 

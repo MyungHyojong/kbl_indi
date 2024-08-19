@@ -3,8 +3,7 @@ library(dplyr)
 library(ggplot2)
 library(DT)
 library(readr)
-
-players <- read_csv('https://raw.githubusercontent.com/MyungHyojong/kbl_indi/main/main_data.csv')
+library(plotly)
 
 # Function to calculate the next multiple of 5
 next_multiple_of_5 <- function(x) {
@@ -13,14 +12,12 @@ next_multiple_of_5 <- function(x) {
 
 # Function to create stat filter UI elements with dynamic max values
 create_stat_filter_ui <- function(data, id, short_label, long_label) {
-  # If the stat is a percentage, set max to 100
-  if (grepl("%", id)) {
+  if (grepl("percentage", id)) {
     max_value <- 100
   } else {
     max_value <- next_multiple_of_5(max(data[[id]], na.rm = TRUE))
   }
   
-  # Clean ID for conditionalPanel
   clean_id <- gsub("[^[:alnum:]]", "_", id)
   
   list(
@@ -36,7 +33,6 @@ create_stat_filter_ui <- function(data, id, short_label, long_label) {
 apply_stat_filter <- function(data, input, id) {
   clean_id <- gsub("[^[:alnum:]]", "_", id)
   if (input[[paste0("filter_", clean_id)]]) {
-    # 슬라이더의 최소, 최대 값을 가져와서 필터링
     min_val <- input[[clean_id]][1]
     max_val <- input[[clean_id]][2]
     
@@ -47,13 +43,17 @@ apply_stat_filter <- function(data, input, id) {
 }
 
 ui <- fluidPage(
-  titlePanel("KBL Player 00~23 game Stats"),
+  titlePanel("KBL Player 00~23 Game Stats"),
   
   sidebarLayout(
     sidebarPanel(
       "Exploring all player stats from the KBL 00-01 to 23-24 seasons",
       
       h3("Filters"),
+      
+      checkboxGroupInput("player_type", "Player Type", 
+                         choices = list("Foreign" = 1, "Korean" = 0),
+                         selected = c(1, 0)),  # 기본으로 둘 다 선택
       
       dateRangeInput("date_range", "Select Date Range:",
                      start = min(players$Date),
@@ -64,21 +64,20 @@ ui <- fluidPage(
       
       selectInput("Team", "Team", c("All", unique(players$Team)), multiple = TRUE, selected = "All"),
       
-      # All stat filters are shown from the start
       do.call(tagList, c(
         create_stat_filter_ui(players, "Pts", "Pts", "Points"),
         create_stat_filter_ui(players, "2PTM", "2PTM", "2PT Made"),
         create_stat_filter_ui(players, "2PTA", "2PTA", "2PT Attempted"),
-        create_stat_filter_ui(players, "`2PT %`", "2PT%", "2PT Percentage"),
+        create_stat_filter_ui(players, "2PT percentage", "2PT%", "2PT Percentage"),
         create_stat_filter_ui(players, "3PTM", "3PTM", "3PT Made"),
         create_stat_filter_ui(players, "3PTA", "3PTA", "3PT Attempted"),
-        create_stat_filter_ui(players, "`3PT %`", "3PT%", "3PT Percentage"),
+        create_stat_filter_ui(players, "3PT percentage", "3PT%", "3PT Percentage"),
         create_stat_filter_ui(players, "FGM", "FGM", "Field Goals Made"),
         create_stat_filter_ui(players, "FGA", "FGA", "Field Goals Attempted"),
-        create_stat_filter_ui(players, "`FG %`", "FG%", "Field Goal Percentage"),
+        create_stat_filter_ui(players, "FG percentage", "FG%", "Field Goal Percentage"),
         create_stat_filter_ui(players, "FTM", "FTM", "Free Throws Made"),
         create_stat_filter_ui(players, "FTA", "FTA", "Free Throws Attempted"),
-        create_stat_filter_ui(players, "`FT %`", "FT%", "Free Throw Percentage"),
+        create_stat_filter_ui(players, "FT percentage", "FT%", "Free Throw Percentage"),
         create_stat_filter_ui(players, "OR", "OR", "Offensive Rebounds"),
         create_stat_filter_ui(players, "DR", "DR", "Defensive Rebounds"),
         create_stat_filter_ui(players, "TOT", "TOT", "Total Rebounds"),
@@ -94,17 +93,15 @@ ui <- fluidPage(
       
       h3("Plot options"),
       
-      # X variable selection for histogram
       conditionalPanel(
         condition = "input.plot_type == 'histogram'",
-        selectInput("x_var_hist", "X Variable", choices = c("Pts", "2PTM", "2PTA", "`2PT %`", "3PTM", "3PTA", "`3PT %`", "FGM", "FGA", "`FG %`", "FTM", "FTA", "`FT %`", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP"))
+        selectInput("x_var_hist", "X Variable", choices = c("Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP"))
       ),
       
-      # X and Y variable selection for scatter and heatmap
       conditionalPanel(
         condition = "input.plot_type == 'scatter' || input.plot_type == 'heatmap'",
-        selectInput("x_var", "X Variable", choices = c("Pts", "2PTM", "2PTA", "`2PT %`", "3PTM", "3PTA", "`3PT %`", "FGM", "FGA", "`FG %`", "FTM", "FTA", "`FT %`", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP")),
-        selectInput("y_var", "Y Variable", choices = c("Pts", "2PTM", "2PTA", "`2PT %`", "3PTM", "3PTA", "`3PT %`", "FGM", "FGA", "`FG %`", "FTM", "FTA", "`FT %`", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP"))
+        selectInput("x_var", "X Variable", choices = c("Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP")),
+        selectInput("y_var", "Y Variable", choices = c("Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP"))
       ),
       
       radioButtons("plot_type", "Plot type", c("histogram", "scatter", "heatmap")),
@@ -116,7 +113,7 @@ ui <- fluidPage(
         textOutput("num_players", inline = TRUE),
         "players in the dataset"
       ),
-      plotOutput("nba_plot"),
+      plotlyOutput("nba_plot"),
       DTOutput("players_data")
     )
   )
@@ -135,7 +132,10 @@ server <- function(input, output, session) {
         filter(Team %in% input$Team)
     }
     
-    stats <- c("Pts", "2PTM", "2PTA", "`2PT %`", "3PTM", "3PTA", "`3PT %`", "FGM", "FGA", "`FG %`", "FTM", "FTA", "`FT %`", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP")
+    players_filtered <- players_filtered %>%
+      filter(foreign %in% input$player_type)
+    
+    stats <- c("Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP")
     for (stat in stats) {
       players_filtered <- apply_stat_filter(players_filtered, input, stat)
     }
@@ -144,44 +144,41 @@ server <- function(input, output, session) {
   })
   
   output$players_data <- renderDT({
-    datatable(filtered_data() %>% select(names(players)[1:25]))  # select() is applied here before datatable()
+    datatable(filtered_data() %>% select(names(players)[1:25]))
   })
   
   output$num_players <- renderText({
     nrow(filtered_data())
   })
   
-  output$nba_plot <- renderPlot({
+  output$nba_plot <- renderPlotly({
+    plot_data <- filtered_data()
+    
     if (input$plot_type == "histogram") {
       x_var <- paste0("`", input$x_var_hist, "`")
-      p <- ggplot(filtered_data(), aes_string(x = x_var)) + 
+      p <- ggplot(plot_data, aes_string(x = x_var)) + 
         geom_histogram(fill = "blue", colour = "black") + 
         theme_classic(base_size = input$size)
       
-      print(p)
     } else if (input$plot_type == "scatter") {
       x_var <- paste0("`", input$x_var, "`")
       y_var <- paste0("`", input$y_var, "`")
-      p <- ggplot(filtered_data(), aes_string(x = x_var, y = y_var, color = "Team")) + 
-        geom_point() +          # Use geom_point for scatter plot
+      p <- ggplot(plot_data, aes_string(x = x_var, y = y_var, color = "Team", text = "Name")) + 
+        geom_point() +          
         theme_classic(base_size = input$size) +
-        theme(legend.position = "none")  # Remove legend
-      
-      print(p)
+        theme(legend.position = "none")
     } else if (input$plot_type == "heatmap") {
       x_var <- paste0("`", input$x_var, "`")
       y_var <- paste0("`", input$y_var, "`")
-      p <- ggplot(filtered_data(), aes_string(x = x_var, y = y_var)) + 
-        geom_bin2d() + 
+      p <- ggplot(plot_data, aes_string(x = x_var, y = y_var, text = "Name")) + 
+        geom_bin2d(bins = 15) +  # Adjust the number of bins to create larger categories
         scale_fill_gradient(low = "white", high = "red") + 
         theme_classic(base_size = input$size) +
         theme(legend.position = "none")  # Remove legend
-      
-      print(p)
     }
+    
+    ggplotly(p, tooltip = c("text"))  # tooltip 옵션 추가
   })
-  
 }
 
 shinyApp(ui, server)
-

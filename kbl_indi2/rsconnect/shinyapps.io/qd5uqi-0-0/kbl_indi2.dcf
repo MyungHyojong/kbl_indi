@@ -5,7 +5,7 @@ account: qd5uqi-0-0
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 12469022
-bundleId: 8994471
+bundleId: 8994502
 url: https://qd5uqi-0-0.shinyapps.io/kbl_indi2/
 version: 1
 asMultiple: FALSE
