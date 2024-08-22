@@ -4,7 +4,7 @@ library(ggplot2)
 library(DT)
 library(readr)
 library(plotly)
-players <- read_csv('https://raw.githubusercontent.com/MyungHyojong/kbl_indi/main/main_data_fixed.csv')
+#players <- read_csv('https://raw.githubusercontent.com/MyungHyojong/kbl_indi/main/main_data_fixed.csv')
 
 # Function to calculate the next multiple of 5
 next_multiple_of_5 <- function(x) {
@@ -70,6 +70,7 @@ ui <- fluidPage(
       selectInput("Team", "Team", c("All", unique(players$Team)), multiple = TRUE, selected = "All"),
       
       do.call(tagList, c(
+        create_stat_filter_ui(players, "MIN", "MIN", "Minutes"),
         create_stat_filter_ui(players, "Pts", "Pts", "Points"),
         create_stat_filter_ui(players, "2PTM", "2PTM", "2PT Made"),
         create_stat_filter_ui(players, "2PTA", "2PTA", "2PT Attempted"),
@@ -100,13 +101,13 @@ ui <- fluidPage(
       
       conditionalPanel(
         condition = "input.plot_type == 'histogram'",
-        selectInput("x_var_hist", "X Variable", choices = c("Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP"))
+        selectInput("x_var_hist", "X Variable", choices = c("MIN", "Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP"))
       ),
       
       conditionalPanel(
         condition = "input.plot_type == 'scatter' || input.plot_type == 'heatmap'",
-        selectInput("x_var", "X Variable", choices = c("Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP")),
-        selectInput("y_var", "Y Variable", choices = c("Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP"))
+        selectInput("x_var", "X Variable", choices = c("MIN","Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP")),
+        selectInput("y_var", "Y Variable", choices = c("MIN","Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP"))
       ),
       
       radioButtons("plot_type", "Plot type", c("histogram", "scatter", "heatmap")),
@@ -143,7 +144,7 @@ server <- function(input, output, session) {
     players_filtered <- players_filtered %>%
       filter(foreign %in% input$player_type)
     
-    stats <- c("Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP")
+    stats <- c("MIN","Pts", "2PTM", "2PTA", "2PT percentage", "3PTM", "3PTA", "3PT percentage", "FGM", "FGA", "FG percentage", "FTM", "FTA", "FT percentage", "OR", "DR", "TOT", "DK", "AST", "TO", "Stl", "BS", "PF", "FO", "PP")
     for (stat in stats) {
       players_filtered <- apply_stat_filter(players_filtered, input, stat)
     }

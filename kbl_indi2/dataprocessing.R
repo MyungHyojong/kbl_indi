@@ -34,6 +34,9 @@ players <- players %>%
   mutate(foreign = ifelse(nchar(Name)<=3, 0, 1)) %>% 
   mutate(foreign = ifelse(Name == '라건아', 1, foreign))
 
+players$MIN <- as.numeric(players$time_min)
+players$time_min <- NULL
+
 
 names(players)
 str(players)
