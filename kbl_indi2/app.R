@@ -44,16 +44,20 @@ apply_stat_filter <- function(data, input, id) {
 }
 
 ui <- fluidPage(
-  titlePanel("KBL Player 00~23 Game Stats"),
+  titlePanel("KBL Player 97-98~23-24 Game Stats"),
   
   sidebarLayout(
     sidebarPanel(
-      "Exploring all player stats from the KBL 00-01 to 23-24 seasons",
+      "Exploring all player stats from the KBL 97-98 to 23-24 seasons",
       
       h3("Filters"),
       
       checkboxGroupInput("player_type", "Player Type", 
                          choices = list("Foreign" = 1, "Korean" = 0),
+                         selected = c(1, 0)),  # 기본으로 둘 다 선택
+      
+      checkboxGroupInput("game_type", "Game Type", 
+                         choices = list("Playoff" = 1, "Regular" = 0),
                          selected = c(1, 0)),  # 기본으로 둘 다 선택
       
       dateRangeInput("date_range", "Select Date Range:",
@@ -132,6 +136,9 @@ server <- function(input, output, session) {
       players_filtered <- players_filtered %>%
         filter(Team %in% input$Team)
     }
+    
+    players_filtered <- players_filtered %>%
+      filter(playoff %in% input$game_type)
     
     players_filtered <- players_filtered %>%
       filter(foreign %in% input$player_type)
