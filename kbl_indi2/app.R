@@ -4,7 +4,7 @@ library(ggplot2)
 library(DT)
 library(readr)
 library(plotly)
-#players <- read_csv('https://raw.githubusercontent.com/MyungHyojong/kbl_indi/main/main_data_fixed.csv')
+players <- read_csv('https://raw.githubusercontent.com/MyungHyojong/kbl_indi/main/main_data_fixed.csv')
 
 # Function to calculate the next multiple of 5
 next_multiple_of_5 <- function(x) {
